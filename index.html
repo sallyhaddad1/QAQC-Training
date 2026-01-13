@@ -1,0 +1,2429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quality Induction </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+   <style>
+       
+        body {
+            font-family: 'Inter', 'Tajawal', sans-serif; 
+            background-color: #f1f5f9; 
+            overscroll-behavior: none;
+            margin: 0;
+        }
+        .slide {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+            height: 100%;
+            overflow: hidden;
+        }
+		
+        .slide-visible {
+            display: block;
+        }
+        .slide-hidden {
+            display: none !important;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .quiz-option {
+            transition: all 0.2s ease;
+        }
+        .quiz-option.correct {
+            background-color: #d1fae5 !important;
+            border-color: #10b981 !important;
+            color: #065f46 !important;
+            font-weight: 600;
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2 !important;
+            border-color: #ef4444 !important;
+            color: #991b1b !important;
+            font-weight: 600;
+        }
+        .quiz-option:disabled:not(.correct):not(.incorrect) {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .quiz-option:disabled {
+            cursor: not-allowed;
+        }
+        .slide-content-wrapper {
+            height: calc(100% - 4rem - 1px);
+            overflow-y: auto;
+            padding-bottom: 2rem;
+        }
+        .slide-content-wrapper::-webkit-scrollbar { width: 8px; }
+        .slide-content-wrapper::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+        .slide-content-wrapper::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
+        .slide-content-wrapper::-webkit-scrollbar-thumb:hover { background: #1d4ed8; }
+        #video-modal-content { width: 90%; max-width: 900px; }
+        #youtube-iframe { aspect-ratio: 16 / 9; width: 100%; height: auto; }
+        .slide-header {
+            position: sticky;
+            top: 0;
+            background-color: rgba(241, 245, 249, 0.95);
+            backdrop-filter: blur(5px);
+            padding-top: 0.25rem;
+            padding-bottom: 0.75rem;
+            z-index: 5;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        /* Placeholder style for missing images */
+        img.placeholder-image {
+            background-color: #e2e8f0;
+            border: 2px dashed #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-weight: bold;
+            text-align: center;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            position: relative;
+            /* توسيط المحتوى داخل body الجديد */
+            margin: 50px auto; 
+        }
+
+        .content-wrapper {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .training-card {
+            background-color: #0d1b3f;
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            width: 48%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            min-height: 450px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            padding-top: 100px;
+        }
+
+        .card-header {
+            position: absolute;
+            top: -50px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .image-placeholder {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: white;
+            border: 5px solid #ab141c;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            opacity: 1; 
+        }
+
+        .list {
+            list-style: none;
+            padding: 0;
+            margin-top: 40px;
+            text-align: right;
+            font-size: 1.1em;
+            width: 100%;
+            padding-right: 20px;
+        }
+
+        .list li {
+            margin-bottom: 15px;
+        }
+
+        .timeline-bar {
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background-color: #ab141c;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 5px;
+        }
+
+        .timeline-text {
+            color: white;
+            font-weight: bold;
+            padding: 0 20px;
+            text-transform: uppercase;
+            font-size: 1.2em;
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .left-arrow::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -20px;
+            width: 0;
+            height: 0;
+            border-top: 20px solid transparent;
+            border-bottom: 20px solid transparent;
+            border-right: 20px solid #ab141c;
+        }
+
+        .right-arrow::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -20px;
+            width: 0;
+            height: 0;
+            border-top: 20px solid transparent;
+            border-bottom: 20px solid transparent;
+            border-left: 20px solid #ab141c;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen text-slate-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md w-full p-4 z-10 flex justify-between items-center flex-shrink-0 border-b border-slate-200">
+        <div class="flex items-center min-w-0"> 
+            <div class="w-10 h-10 bg-blue-800 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+                <!-- Icon representing Industrial Equipment -->
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a8 8 0 11-14.856 0M12 21a8 8 0 100-16 8 8 0 000 16z"></path></svg>
+            </div>
+            <div class="ml-3 truncate">
+                <h1 class="text-lg md:text-xl font-bold text-slate-900">Quality Induction</h1>
+            </div>
+        </div>
+        <div class="text-sm font-medium text-slate-500 flex-shrink-0 ml-2 bg-slate-100 px-3 py-1 rounded-full" id="slide-counter">Slide 1 / 18</div>
+    </header>
+
+    <!-- Main Slide Container -->
+    <main id="slide-container" class="flex-1 overflow-hidden p-4 md:p-8 lg:p-12 relative">
+        
+        <!-- Slide 0: Title -->
+       <section id="slide-0" class="slide slide-visible flex flex-col justify-center items-center text-center p-4">
+    <div class="bg-white p-10 md:p-16 rounded-2xl shadow-xl max-w-4xl w-full border-t-8 border-blue-800">
+        <span class="block text-sm font-bold text-blue-600 uppercase tracking-widest mb-2">Target Engineering Construction - National Emirates Training</span>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 mb-6">Lower Zakum Long Term Development Plan (LTDP-1), Package 5 DAS Island Terminal Facilities Project
+ <br/><span class="text-blue-700">Quality Induction</span></h1>
+        <div class="w-24 h-1 bg-yellow-500 mx-auto mb-8 rounded-full"></div>
+        <p class="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">A comprehensive competency-based course on industrial stationary assets, from Heat Exchangers to Separation Columns.</p>
+        
+       <button id="start-btn" class="bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
+    Start Course
+</button>
+    </div>
+</section>
+
+        <!-- Slide 1: PURPOSE  -->
+     <section id="slide-1" class="slide">
+    <div class="slide-content-wrapper flex flex-col gap-6">
+
+        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+						<h4><b> PURPOSE</b></h4>
+                <p class="text-slate-700 text-lg">
+The purpose of this workshop is to create an awareness amongst TARGET’s employees about implementation of TARGET’s Quality Management System (QMS) based on ISO 9001:2015.
+
+                </p>
+            </div>
+        </div>  
+		 <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			<h4><b> SOME IMPORTANT ISO STANDARDS </b></h4>
+                <p class="text-slate-700 text-lg">
+1. ISO 9000:2015 - Quality Management System & Fundamentals & Vocabulary <br>
+2. ISO 9001:2015 - Quality Management System & Requirements<br>
+3. ISO 9004:2018 - Managing for the sustained success of an organization. & A quality management approach.<br>
+4. ISO 10005:2018 - Quality Management Systems & Guidelines for Quality Plans. <br>
+5. ISO 10006:2017 - Quality Management System & Guideline for quality management in projects <br>
+6. ISO 10013:2021 - Guidelines for Quality Management Systems Documentation. <br>
+7. ISO 19011:2018 - Guideline for Auditing management System. <br>
+8. ISO 14001:2015 - Environmental management systems & Requirements with guidance for use. <br>
+9. ISO 31000:2018 - Risk Management. <br>
+10. ISO 45001:2018 - Occupational health & safety management system & Requirements.
+                </p>
+            </div>
+        </div>   
+    </div>
+</section>
+
+
+        <!-- Slide 2:  DEFINITIONS-->
+ <section id="slide-2" class="slide">
+    <div class="slide-content-wrapper flex flex-col gap-6"> 
+	            <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">DEFINITIONS</h2>
+		<div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			<p class="text-slate-700 text-lg">
+1. QUALITY – Degree to which a set of inherent characteristics of an object fulfills requirements.<br>
+2. QUALITY POLICY – Policy (intentions and direction of an organization as formally expressed by its top management) related to Quality.<br>
+3. QUALITY OBJECTIVE – Objective (result to be achieved) related to Quality.<br>
+4. QUALITY  ASSURANCE  –  Part  of  Quality  Management  focused  on  providing confidence that quality requirements (need or expectation that is stated, generally implied or obligatory) will be fulfilled.<br>
+5. QUALITY CONTROL – Part of quality management focused on fulfilling quality requirements.<br>
+6. QUALITY  MANUAL  –  Specification  (document  stating  requirements)  for  the Quality Management System of an organization.<br>
+7. QUALITY PLAN – Specification of the procedures (specified way to carried out and activity or a process)  and associated resources to be applied when and whom to a specific object.<br>
+8. MANAGEMENT – Coordinated activities to direct and control an organization.<br>
+9. ORGANIZATION	–	Person	or	group	of	people	that	has	its	own	functions with responsibilities, authorities and relationships to achieve its objectives.<br>
+10. QUALITY MANAGEMENT  SYSTEM  –  Part  of  a  management  system  (set  of interrelated or interacting elements of an organization to establish policies and objectives, and processes to achieve those objectives) with regard to Quality.<br>
+11. AUDIT – Systematic, Independent and Documented process for obtaining objective evidence and evaluating it objectively to determine the extent to which audit criteria are fulfilled.
+12. CORRECTION – Action to eliminate a detected	nonconformity.<br>
+13. CORRECTIVE ACTION – Action to eliminate the cause of a nonconformity and to prevent recurrence.<br>
+14. PREVENTIVE	ACTION	–	Action	to	eliminate	the	cause	of	a	potential nonconformity or other potential undesirable situation.<br>
+15. NONCONFORMITY – Non-fulfillment of requirement.<br>
+16. PROCESS – Set of interrelated and interacting activities that use inputs to deliver an intended result.<br>
+17. SYSTEM – Set of interrelated and interacting elements.<br>
+18. IMPROVEMENT – Activity to enhance performance.<br>
+19. CONTINUAL IMPROVEMENT – Recurring activity to enhance performance.<br>
+20. DOCUMENTED  INFORMATION  –  Information  required  to  be  controlled  and maintained by an organization and the medium on which it is contained.<br>
+21. DESIGN AND DEVELOPMENT – Set of process that transform requirements for an object into more detail requirements for that project.<br>
+22. AUDIT SCOPE – Extent and boundaries of an audit.<br>
+23. AUDIT PROGRAMME – Set of one or more audits planned for a specific time frame and directed towards a specific purpose.<br>
+24. AUDIT PLAN – Description of the activities and arrangement for an audit.<br>
+25. AUDIT CRITERIA	– Set	of	policies,	procedures	or	requirements	used	as	a reference against which objective evidence is compared.<br>
+26. STRATEGY – Plan to achieve long term or overall objectives.<br>
+27. VISION – Aspiration of what an organization would like to become as expressed by top management.<br>
+28. REQUIREMENT	–	Need	or	expectation	that	is	stated,	generally	implied	or obligatory.<br>
+29. STATUTORY REQUIREMENT – Obligatory requirement specified by a legislative body.<br>
+30. REGULATORY	REQUIREMENT	–	Obligatory	requirement	specified	by	an authority mandated by a legislative body.<br>
+31. RISK – Effect of uncertainty.<br>
+32. RISK MANAGEMENT – Coordinated activities to direct and control risks of an organization.<br>
+33. RISK	AND	OPPORTUNITY	–	Potential	adverse	effect	(threats)	and	potential beneficial effects (opportunities).<br>
+34. VERIFICATION – Confirmation, through the provision of objective evidence, that specified requirements have been fulfilled.<br>
+35. VALIDATION – Confirmation, through the provision of objective evidence, that specified  requirements  for  a  specific  intended  use  or  application  have  been fulfilled.<br>
+36. TECHNICAL EXPERT – Person who provides specific knowledge or expertise to the audit team.
+
+
+                </p>
+            </div>
+        </div>  
+    </div>
+</section>
+
+ <!-- Slide 3: PRINCIPLES OF ISO 9001: 2015-->
+     <section id="slide-3" class="slide">
+           <div class="slide-content-wrapper flex flex-col gap-6">
+        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+						<h4><b> PRINCIPLES OF ISO 9001: 2015</b></h4>
+                <p class="text-slate-700 text-lg">
+1. Customer focus <br>
+2. Leadership <br>
+3. Engagement of people<br>
+4. Process approach<br>
+5. Improvement<br>
+6. Evidence-based decision making<br>
+7. Relationship management
+
+                </p>
+            </div>
+        </div>  
+		 <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			<h4><b> CLAUSES OF ISO 9001: 2015 - Introduction </b></h4>
+                <p class="text-slate-700 text-lg">
+1. Scope <br>
+2. Normative reference<br>
+3. Terms and definitions<br>
+4. Context of the Organization <br>
+5. Leadership <br>
+6. Planning <br>
+7. Support <br>
+8. Operation <br>
+9. Performance Evaluation <br>
+10. Improvement
+                </p>
+            </div>
+        </div>   
+    </div>
+        </section>	
+
+        <!-- Slide 4:FUNCTIONAL QUALITY OBJECTIVES/KPIs -->
+      <section id="slide-4" class="slide">
+                  <div class="slide-content-wrapper flex flex-col gap-6">
+        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+						<h4><b> FUNCTIONAL QUALITY OBJECTIVES/KPIs</b></h4>
+					<h4><b> ISO 9001:2015 (Clause 6.2 Quality Objectives and Planning to achieve them) - Development</b></h4>
+
+                <p class="text-slate-700 text-lg">
+1. Overall – An Objective should be Specific, Measurable, Achievable, Realistic, Time bound.<br>
+2. Should be in line with Company’s Quality Policy.<br>
+3. Should be measurable.<br>
+4. Should take into account applicable requirements.<br>
+5. Should	be	relevant	to	conformity	of	product	and	services	to	enhancement	of customer satisfaction.<br>
+6. Should be monitored, communicated and updated as appropriate.<br>
+7. Should have a target with a time scale within which it should be achieved.<br>
+8. Should	add	value	to	the	business	process	and	demonstrate	continual
+improvement.
+
+
+                </p>
+            </div>
+        </div>  
+		 <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			<h4><b> Continual Improvement </b></h4>    
+				<p class="text-slate-700 text-lg">
+Improvement to Resources / Organisation and Processes / Procedures is facilitated by implementation of the planned and approved arrangements and the corrective actions and the preventive measures identified during active/reactive monitoring & inspection.
+                </p>
+				 <p class="text-slate-700 text-lg">
+				 Opportunity for improvement can be identified from following sources (inputs)<br>
+<br>
+1. Management review meetings<br>
+2. Engineers/Designers meetings<br>
+3. Customer feed back<br>
+4. Ongoing monitoring of Performance Indicators (KPI’s)<br>
+5. Project conformance and Product conformity<br>
+6. Results of audits and assessments<br>
+7. Addition/revision to Client/PMC policy<br>
+8. Head office specific issues<br>
+9. Risk Analysis<br>
+10. New initiatives<br>
+11. Quality Performance Assessments<br>
+12. Operating Board review meetings<br>
+<br>
+With these sources  and  Business  Process  Improvement  Plan, opportunities for  improvements  can be prioritised, developed and tracked to define progress (earned value) which over time can demonstrate continual improvement.
+
+
+                </p>
+            </div>
+        </div>   
+    </div>
+        </section>	
+
+        <!-- Slide 5: OverView-->
+		  <section id="slide-4" class="slide">
+            <div class="slide-content-wrapper">
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200">                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Session 1 Card -->
+                        <div class="bg-blue-50 p-6 rounded-xl border border-blue-100 hover:shadow-md transition-shadow">
+                            <ul class="space-y-3 text-slate-700 ml-14">
+                                <li class="flex items-start"><svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                 INTRODUCTION</li>
+                                <li class="flex items-start"><svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+								TARGET QUALITY POLICY</li>
+                                <li class="flex items-start"><svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+								TARGET QUALITY MANAGEMENT SYSTEM </li>
+								  <li class="flex items-start"><svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+							    PROJECT QUALITY SYSTEM  </li>
+								  <li class="flex items-start"><svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+								ENGINEERING QUALITY </li>
+								  <li class="flex items-start"><svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+								PROCUREMENT QUALITY </li>
+								  <li class="flex items-start"><svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+								CONSTRUCTION / FABRICATION CONTROL  </li>
+								  <li class="flex items-start"><svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+								PROJECT DOCUMENT CONTROL </li>
+								  <li class="flex items-start"><svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+								PROJECT AUDIT SCHEDULE  </li>
+								  <li class="flex items-start"><svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+								PROJECT KPI </li>
+								  <li class="flex items-start"><svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+						        RISK MANAGEMENT (RISK WORKSHOP) </li>
+								  <li class="flex items-start"><svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+								LESSON LEARNED </li>
+                            </ul>
+                        </div>                       
+                    </div>
+                </div>
+            </div>
+        </section>	
+
+		
+		 <!-- Slide 6: PROJECT HIGHLIGHTS-->
+ <section id="project-details" class="slide">
+    <h2 class="text-3xl font-bold text-slate-800 mb-6 slide-header">PROJECT HIGHLIGHTS</h2>
+
+    <div class="slide-content-wrapper" style="width: 100%; max-width: 800px; margin: 0 auto;">
+        
+        <div class="space-y-2">
+
+            <div class="grid grid-cols-12 rounded-lg overflow-hidden shadow-md">
+                <div class="col-span-4 p-3 font-semibold text-white text-left" style="background-color: #A33C40;">
+                    Project Name
+                </div>
+                <div class="col-span-8 p-3 bg-white text-left text-slate-800 border-l border-slate-200">
+                    EPC for Lower Zakum LTDP-1, Package 5
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 rounded-lg overflow-hidden shadow-md">
+                <div class="col-span-4 p-3 font-semibold text-white text-left" style="background-color: #C35B47;">
+                    Project Location
+                </div>
+                <div class="col-span-8 p-3 bg-white text-left text-slate-800 border-l border-slate-200">
+                    Lower Zakum, DAS Island
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 rounded-lg overflow-hidden shadow-md">
+                <div class="col-span-4 p-3 font-semibold text-white text-left" style="background-color: #D2834E;">
+                    Project Scope
+                </div>
+                <div class="col-span-8 p-3 bg-white text-left text-slate-800 border-l border-slate-200">
+                    Engineering, Procurement, Construction, Commissioning & Installation
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 rounded-lg overflow-hidden shadow-md">
+                <div class="col-span-4 p-3 font-semibold text-white text-left" style="background-color: #B58450;">
+                    Client
+                </div>
+                <div class="col-span-8 p-3 bg-white text-left text-slate-800 border-l border-slate-200">
+                    ADNOC Offshore
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 rounded-lg overflow-hidden shadow-md">
+                <div class="col-span-4 p-3 font-semibold text-white text-left" style="background-color: #C2AF53;">
+                    Effective Date
+                </div>
+                <div class="col-span-8 p-3 bg-white text-left text-slate-800 border-l border-slate-200">
+                    20-Mar-2025
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 rounded-lg overflow-hidden shadow-md">
+                <div class="col-span-4 p-3 font-semibold text-white text-left" style="background-color: #A3AF4E;">
+                    Contract Type
+                </div>
+                <div class="col-span-8 p-3 bg-white text-left text-slate-800 border-l border-slate-200">
+                    Firm Lump Sum
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 rounded-lg overflow-hidden shadow-md">
+                <div class="col-span-4 p-3 font-semibold text-white text-left" style="background-color: #83B04A;">
+                    Engineering Subcontractor
+                </div>
+                <div class="col-span-8 p-3 bg-white text-left text-slate-800 border-l border-slate-200">
+                    Wood PLC - Abu Dhabi
+                </div>
+            </div>
+
+            <div class="grid grid-cols-12 rounded-lg overflow-hidden shadow-md">
+                <div class="col-span-4 p-3 font-semibold text-white text-left" style="background-color: #6C9E59;">
+                    Contract Duration
+                </div>
+                <div class="col-span-8 p-3 bg-white text-left text-slate-800 border-l border-slate-200">
+                    61 Months
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+		
+	 <!-- Slide 7: PROJECT SOW-->
+        <section id="slide-7" class="slide">
+                      <div class="slide-content-wrapper flex flex-col gap-6">
+					  	            <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROJECT SOW</h2>
+        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+                <p class="text-slate-700 text-lg">
+				The overall Scope of WORK includes, but not limited to, the Engineering, Procurement, Construction, Installation and Commissioning of all the new facilities and main components of 2 main Oil Trains as summarized below:
+<br> <br>
+1. Separation Trains: 150 MSTBOPD three (3) trains having HP Separator, Oil / Oil exchanger, LP Separator & Crude Oil Charge Pumps.<br>
+2. Desalting/Dehydrator – 200 MSTBOPD three (3) trains.<br>
+3. LP oil stabilization system – 200 MSTBOPD three (3) trains having Oil stabilizer column, Oil stabilizer bottom pumps, Oil stabilizer side reboiler, Oil stabilizer column reboiler, and Product oil / oil exchanger.
+                </p>
+            </div>
+        </div>   
+    </div>
+        </section>
+
+        <!-- Slide 8: PROJECT BACKGROUND & SCOPE -->
+             <section id="project-flow-scope" class="slide">
+    <h2 class="text-3xl font-bold text-slate-800 mb-6 slide-header">PROJECT BACKGROUND & SCOPE</h2>
+
+    <div class="slide-content-wrapper p-4" style="width: 100%;">
+     
+        <div class="flex flex-col lg:flex-row items-stretch justify-center space-y-4 lg:space-y-0 lg:space-x-4">
+
+            <div class="bg-red-700 text-white p-4 rounded-xl shadow-lg flex-1 min-h-[150px] relative">
+                <p class="text-sm">
+ZAKUM Field is located in the central part of the Arabian Gulf at about 65 KM NW of Abu Dhabi town and 100 KM to the East- Southeast of Das Island. Lower Zakum field Facilities include approx. 118 wellhead towers hosting oil producers, gas injectors and water injectors
+                </p>
+                <div class="hidden lg:block absolute right-[-1.5rem] top-1/2 transform -translate-y-1/2 w-6 h-6 border-t-8 border-r-8 border-transparent border-t-orange-700 rotate-45"></div>
+            </div>
+
+            <div class="lg:hidden flex justify-center">
+                <svg class="w-6 h-6 text-orange-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+            </div>
+
+            <div class="bg-orange-600 text-white p-4 rounded-xl shadow-lg flex-1 min-h-[150px] relative">
+                <p class="text-sm">
+The crude oil produced from the Lower Zakum wells is collected from the production sites to two main offshore gathering and primary processing centres, Zakum Central Super Complex (ZCSC) and Zakum Western Super Complex (ZWSC) via a field network of around 310 KM length including the 24” line between ZWSC and ZCSC
+                </p>
+                <div class="hidden lg:block absolute right-[-1.5rem] top-1/2 transform -translate-y-1/2 w-6 h-6 border-t-8 border-r-8 border-transparent border-t-orange-700 rotate-45"></div>
+            </div>
+
+            <div class="lg:hidden flex justify-center">
+                <svg class="w-6 h-6 text-orange-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+            </div>
+
+            <div class="bg-amber-600 text-white p-4 rounded-xl shadow-lg flex-1 min-h-[150px] relative">
+                <p class="text-sm">
+The oil processed at ZCSC is routed to ZWSC via 24” line for onward transfer. The combined field oil production from ZWSC/ZCSC is then routed through the 30” MOL (92KM) to
+Das Island where final processing, stabilization, storage and offloading to tankers is done
+                </p>
+                <div class="hidden lg:block absolute right-[-1.5rem] top-1/2 transform -translate-y-1/2 w-6 h-6 border-t-8 border-r-8 border-transparent border-t-green-700 rotate-45"></div>
+            </div>
+
+            <div class="lg:hidden flex justify-center">
+                <svg class="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+            </div>
+
+            <div class="bg-green-700 text-white p-4 rounded-xl shadow-lg flex-1 min-h-[150px]">
+                <p class="text-sm">
+Lower Zakum LTDP1 will be implemented in phases. The LZ LTDP (Phase-1), which is the focus of this EPC, comprise building up and sustaining the plateau rate of 450 MBD upto 2035. To further extend the plateau beyond 2035 will necessitate additional facilities which will be part of future phased development LZ LTDP (Phase- 2 & 3)
+                </p>
+            </div>
+        </div>
+
+        <div class="border-t border-slate-300 my-8"></div>        
+        <div class="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+            
+            <div class="bg-red-700 text-white p-4 rounded-xl shadow-lg md:w-1/3 relative">
+                <p class="text-sm">
+The overall Scope of WORK includes, but not limited to, the Engineering, Procurement, Construction, Installation and Commissioning of all the new facilities and main components of 2 main Oil Trains as summarized ::
+                </p>
+                <div class="hidden md:block absolute right-[-1.5rem] top-1/2 transform -translate-y-1/2 w-6 h-6 border-t-8 border-r-8 border-transparent border-t-orange-600 rotate-45"></div>
+            </div>
+
+            <div class="md:hidden flex justify-center">
+                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+            </div>
+
+            <div class="bg-orange-600 text-white p-4 rounded-xl shadow-lg md:w-2/3">
+                <ul class="list-none space-y-3 text-sm">
+                    <li>
+                        <span class="font-bold">1. Separation Trains:</span> 150 MSTBOPD two (2) trains having HP Separator, Oil / Oil exchanger, LP Separator & Crude Oil Charge Pumps.
+                    </li>
+                    <li>
+                        <span class="font-bold">2. Desalting / Dehydrator:</span> 200 MSTBOPD two (2) Trains
+                    </li>
+                    <li>
+                        <span class="font-bold">3. LP oil stabilization system:</span> 200 MSTBOPD two (2) trains having Oil stabilizer column, Oil stabilizer bottom pumps, Oil stabilizer side reboiler, Oil stabilizer column reboiler, and Product oil / oil exchanger.
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+        <!-- Slide 9: PROJECT BACKGROUND & SCOPE -->
+            <section id="slide-9" class="slide">
+			
+			  <div class="slide-content-wrapper flex flex-col gap-6">
+              <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROJECT BACKGROUND & SCOPE </h2>
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200">                    
+                    <div class="flex flex-col md:flex-row gap-8 items-center">
+                     <div class="flex-1 flex justify-center">
+                            <div class="relative w-full max-w-xl aspect-[3/4] bg-white rounded-lg shadow-inner border border-slate-300 overflow-hidden">
+                                 <img src="images/Picture1.jpg"
+								 alt="Slide 18: Fired Heater Cutaway"  class="zoomable w-full h-full object-contain cursor-zoom-in">
+                                 <div class="hidden absolute inset-0 flex-col items-center justify-center text-center p-4 text-slate-400 bg-slate-50">
+                                     <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+				</div>
+        </section>
+
+ <!-- Slide 10: PROJECT OBJECTIVE -->
+                   <section id="slide-10" class="slide">
+                     <div class="slide-content-wrapper flex flex-col gap-6">
+		   <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROJECT OBJECTIVE</h2>
+        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+                <p class="text-slate-700 text-lg">
+The objective of LZ LTDP – Phase 1 Package 5 project is to design and implement the process facilities 
+at Das Island, adequate to sustain production of 450 MBD from Lower Zakum field.
+ </p>
+            </div>
+        </div>   
+    </div>
+        </section>
+		
+		<!-- Slide 11:TARGET QUALITY MANAGEMENT SYSTEM -->
+		  <section id="slide-11" class="slide flex flex-col justify-center items-center text-center p-4">
+                     <div class=" bg-white p-10 md:p-16 ">
+        
+        <span class="block text-sm font-bold text-red-700 uppercase tracking-widest mb-2">TARGET QUALITY MANAGEMENT SYSTEM</span>
+        
+        <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 mb-6 leading-tight">
+            “QUALITY RELATED ACTIVITIES ARE PERFORMED BY ALL PROJECT TEAMMEMBERS AT ALL PROJECT PHASES”
+        </h1>
+        
+        <div class="w-24 h-1 bg-yellow-500 mx-auto mb-8 rounded-full"></div> 
+        
+        <div class="w-full">
+            <div class="flex justify-end">
+                <div class="text-4xl font-extrabold text-slate-800">
+                    <span class="text-red-700">T</span>ARGET
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</section>
+      
+		<!-- Slide 12: TARGET QUALITY POLICY -->
+                 <section id="slide-12" class="slide">
+            <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">TARGET QUALITY POLICY </h2>
+            <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Air Cooled -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500" >
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/Picture2.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in" >
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                           </div>
+
+                         <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                         <!-- Image Container -->
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">TARGET QUALITY POLICY </h4>
+                <p class="text-slate-700 text-lg">
+It is the Company’s policy to ensure that all projects are executed  in  accordance  with  contract,  specifications  and drawings,  within  the  contractual  time  frame,  and  in compliance with all legal and other applicable requirements thus providing good value and satisfaction to all Clients.
+
+ </p>
+            </div>
+        </div> 
+                      </div>
+                </div>
+            </div>
+        </section>
+		
+		 <!-- Slide 13:TARGET QUALITY MANAGEMENT SYSTEM-->
+           <section id="slide-13" class="slide">
+           <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">TARGET QUALITY MANAGEMENT SYSTEM </h2>
+            <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Air Cooled -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500" >
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/Picture3.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in" >
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                           </div>
+
+                         <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                         <!-- Image Container -->
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PLAN, IMPLEMENT, MONITOR AND CONTROL </h4>
+                <p class="text-slate-700 text-lg">
+The Plan-Do-Check-Act cycle is an integral mechanism in the implementation of  management  system  control.These  four  steps  of  the  PDCA  Cycle  are repeated  over  and  over  as  part  of  a  never-ending  cycle  of  continual impro
+
+ </p>
+            </div>
+        </div> 
+                      </div>
+                </div>
+            </div>
+        </section>
+		
+		<!-- Slide 14: QUALITY -->
+       <section id="slide-14" class="slide">
+            <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">TARGET QUALITY MANAGEMENT SYSTEM </h2>
+            <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				  <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Target QMS </h4>
+                <p class="text-slate-700 text-lg">
+- Project Quality system <br>
+- Engineering Quality system<br>
+- Procurement Quality System<br>
+- Construction / Fabrication Control System
+
+ </p>
+            </div>
+        </div> 
+                      </div>
+					          <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                         <!-- Image Container -->
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">TARGET QUALITY MANAGEMENT SYSTEM : </h4>
+                <p class="text-slate-700 text-lg">
+Quality Management System (QMS) is certified ISO 9001:2015 and part of Integrated Management System
+ </p>
+            </div>
+        </div> 
+                      </div>
+					    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                         <!-- Image Container -->
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">QUALITY POLICY : </h4>
+                <p class="text-slate-700 text-lg">
+It is the Company’s policy to ensure that all projects are executed in
+accordance  with  contract,  specifications  and  drawings,  within  the contractual time frame, and in compliance with all legal and other applicable requirements thus providing good value and satisfaction to all Clients. </p>
+            </div>
+        </div> 
+                      </div>
+                    <!-- Air Cooled -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500" >
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/Picture5.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in" >
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                           </div>
+
+                         <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500" >
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/Picture6.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in" >
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                           </div>
+                </div>
+            </div>
+        </section>
+		
+		<!-- Slide 15: PROJECT QUALITY ASSURANCE -->
+      <section id="slide-15" class="slide">
+	            <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROJECT QUALITY ASSURANCE </h2>
+   <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROJECT QUALITY PLAN AD-42.0-Q-96006 </h4>
+
+            <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				  <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Target QMS </h4>
+                <p class="text-slate-700 text-lg">
+- Project Quality system <br>
+- Engineering Quality system<br>
+- Procurement Quality System<br>
+- Construction / Fabrication Control System
+
+ </p>
+            </div>
+        </div> 
+                      </div>
+					          <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                         <!-- Image Container -->
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROJECT QUALITY MANAGEMENT SYSTEM : </h4>
+                <p class="text-slate-700 text-lg">
+1. Based on the guideline for Projects Quality System Requirements from Annexure 10E Section 1 & 2 (AGES –GL-13-001 :
+Contractor’s QA/QC Requirements ) .<br>
+2. Project Quality Plan based on ISO 9001 & ISO 10005 Elements in addition to AGES-GL-13-001
+ </p>
+            </div>
+        </div> 
+                      </div>
+					    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                         <!-- Image Container -->
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Initial Key Deliverables </h4>
+                <p class="text-slate-700 text-lg">
+1. Project Execution Plan<br>
+2. Project Quality Plan<br>
+3. Project Coordination Procedure<br>
+4. Document Control Procedure<br>
+5. Project Procurement Plan<br>
+6. Interface Management Plan<br>
+7. Criticality Rating Procedure<br>
+8. Lessons Learned Procedure<br>
+9. Non-Conformance Management Procedure<br>
+10. MR ITPs
+</p>
+            </div>
+        </div> 
+                      </div>
+					      <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                         <!-- Image Container -->
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Training </h4>
+                <p class="text-slate-700 text-lg">
+1. Project Induction<br>
+2.Job Training Plans
+<br>
+3. Toolbox Talks
+</p>
+            </div>
+        </div> 
+                      </div>
+					      <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                         <!-- Image Container -->
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Audits </h4>
+                <p class="text-slate-700 text-lg">
+Internal Quality Audits 30%,60% & 90% of each stage progress
+
+</p>
+            </div>
+        </div> 
+                      </div>
+					    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                         <!-- Image Container -->
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Monthly Quality Report </h4>
+                <p class="text-slate-700 text-lg">
+Based on the approved format as per PQP along with KPI (Based on Appendix I of AGES-GL-13-001).
+
+</p>
+            </div>
+        </div> 
+                      </div>
+                    <!-- Air Cooled -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500" >
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/picture7.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in" >
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                           </div>
+                </div>
+            </div>
+        </section>
+		
+			 <!-- Slide 16:PROJECT QUALITY ASSURANCE-->
+  <section id="slide-16" class="slide">
+               <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROJECT QUALITY ASSURANCE </h2>
+   <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROJECT QUALITY ORGANIZATION: Part of Approved Project Quality Plan AD-42.0-Q-96006 </h4>
+
+            <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				  <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Target QMS </h4>
+                <p class="text-slate-700 text-lg">
+- Project Quality system <br>
+- Engineering Quality system<br>
+- Procurement Quality System<br>
+- Construction / Fabrication Control System
+
+ </p>
+            </div>
+        </div> 
+                      </div>
+					         
+                    <!-- Air Cooled -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500" >
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/Picture8.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in" >
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                           </div>
+                </div>
+            </div>
+        </section>
+		
+	<!-- Slide 17: ENGINEERING QUALITY SYSTEM -->
+      <section id="slide-17" class="slide">
+                   <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">ENGINEERING QUALITY SYSTEM </h2>
+				   <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				  <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Target QMS </h4>
+                <p class="text-slate-700 text-lg">
+- Project Quality system <br>
+- Engineering Quality system<br>
+- Procurement Quality System<br>
+- Construction / Fabrication Control System
+
+ </p>
+            </div>
+        </div> 
+                      </div>
+					       <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Target QMS </h4>
+                <p class="text-slate-700 text-lg">
+				Well defined IDC Matrix (Quality review for Project Specific Specification,Data Sheet, Material Specification & TBE ) & Spot Checks.
+				<br><br>
+1. Engineering Quality Plan<br>
+-Inlcusive Design Control Procedure<br>
+-Inclusive Change Control Procedure<br>
+-Inter Discipline Checking Procedure<br>
+-Design Review Procedure<br>
+-Design Verification Procedure<br>
+-Design Validation Procedure
+ <br><br>
+2. Software & Spread Sheet Control and Validation Procedure
+<br>
+3. Engineering Execution Plan
+<br>
+4. Design Assurance Review Plan & Procedures
+
+ </p>
+            </div>
+        </div> 
+                      </div>    
+                    <!-- Air Cooled -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500" >
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/picture9.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in" >
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                           </div>
+                </div>
+            </div>
+            
+        </section>
+		
+	  <!-- Slide 18: PROCURMENT QUALITY SYSTEM-->
+ <section id="slide-18" class="slide">
+                     <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROCURMENT QUALITY SYSTEM </h2>
+				   <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				  <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Target QMS </h4>
+                <p class="text-slate-700 text-lg">
+- Project Quality system <br>
+- Engineering Quality system<br>
+- Procurement Quality System<br>
+- Construction / Fabrication Control System
+
+ </p>
+            </div>
+        </div> 
+                      </div>
+					       <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Target QMS </h4>
+                <p class="text-slate-700 text-lg">
+1. Documentation during Engineering shall be specifically reviewed by the Quality (Data Sheet, Material Requisition &
+Tech. Bid Evaluation).
+<br>
+2. Procurement Inspection & Certification Requirements shall be as per AGES-SP-13-002 Specification.
+
+<br>
+3. The VENDORs will be selected based on ADNOC Approved Vendor List (AVL) and SUBCONTRACTORs will be selected 	based on ADNOC Approved contractor list (ACL)
+
+<br>
+4.Where no technical compliant VENDOR/SUBCONTRACTOR exists on ADNOC AVL or ACL, CONTRACTOR shall follow a 	structured pre-qualification process, where applicable. Company guidelines for Project Specific Pre-qualification A0-Q- 	PQ-PRO-006 shall be followed
+
+
+ </p>
+            </div>
+        </div> 
+                      </div>    
+                    <!-- Air Cooled -->
+                  <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500" >
+                <div class="w-full h-full overflow-auto">
+                    <h4 class="text-2xl font-bold text-slate-800 mb-4 text-center">Procurement Activities, Roles & Documents</h4>
+                    <table class="min-w-full divide-y divide-slate-200 border border-slate-300 rounded-lg overflow-hidden">
+                        <thead class="bg-slate-100">
+                            <tr>
+                                <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-slate-600 uppercase tracking-wider border-r border-slate-200">ACTIVITY</th>
+                                <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-slate-600 uppercase tracking-wider border-r border-slate-200">ROLE</th>
+                                <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-slate-600 uppercase tracking-wider">DOCUMENT</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200 text-sm text-slate-700">
+                            <tr>
+                                <td class="px-3 py-2 whitespace-normal border-r border-slate-200">To make sure that the purchasing documents for this project fulfil all the Contract requirements and include all the necessary documentation.</td>
+                                <td class="px-3 py-2 whitespace-normal border-r border-slate-200">Procurement Engineer / Procurement Manager</td>
+                                <td class="px-3 py-2 whitespace-normal">General Conditions. Instructions. VENDOR’s List. Request for quotation, Reception and Assessment of Commercial Tenders. Drawing up of the Technical File for Purchasing. VENDOR’s Acceptance of the Order.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2 whitespace-normal border-r border-slate-200">Technical Bid Review</td>
+                                <td class="px-3 py-2 whitespace-normal border-r border-slate-200">Project Engineer/ Discipline Engineer</td>
+                                <td class="px-3 py-2 whitespace-normal">Project requirements and general overview, Review of Technical requirements</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2 whitespace-normal border-r border-slate-200">To make sure that the supplies are made in accordance with the Forecast Program, to meet delivery deadlines</td>
+                                <td class="px-3 py-2 whitespace-normal border-r border-slate-200">Procurement Engineer</td>
+                                <td class="px-3 py-2 whitespace-normal">Procurement Status Report</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2 whitespace-normal border-r border-slate-200">Follow-up of compliance with the Project Specifications in the manufacturing of the equipment and materials.</td>
+                                <td class="px-3 py-2 whitespace-normal border-r border-slate-200">Procurement Engineer / Quality Engineer</td>
+                                <td class="px-3 py-2 whitespace-normal">Pre-Inspection meeting Report NC Report Inspection Report Inspection Release Note</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2 whitespace-normal border-r border-slate-200">Transport materials from VENDOR workshop to Site according to P.O. Conditions</td>
+                                <td class="px-3 py-2 whitespace-normal border-r border-slate-200">Logistics Coordinator</td>
+                                <td class="px-3 py-2 whitespace-normal">Shipping Control Report Release Note</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+						       <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Target QMS </h4>
+                <p class="text-slate-700 text-lg">
+5. Criticality Rating Procedure as per AGES-SP-13-001
+(Criticality Rating Specifications)
+<br>
+6. Procurement Inspection & Certification Requirements as per AGES-SP-13-002 Specification.
+<br>
+7. PIM package submission after approval of Key Vendor Deliverables
+<br>
+8. Inspection Class based on Criticality ratings.<br>
+9. 3.1 OR 3.2 Certification based on AGES-SP-13-002<br>
+10. SMR (Stock Material Request –In case of Company 	approved the justification shall carry out through 	Appendix-F of AGES-GL-13-001.
+
+
+
+ </p>
+            </div>
+        </div> 
+                      </div>    
+                </div>
+            </div> 
+        </section>
+		
+			 <!-- Slide 18: PROCURENT QUALITY SYSTEM-->
+          <section id="slide-18" class="slide">
+                  <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROCURENT QUALITY SYSTEM </h2>
+
+            <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				  <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Target QMS </h4>
+                <p class="text-slate-700 text-lg">
+- Project Quality system <br>
+- Engineering Quality system<br>
+- Procurement Quality System<br>
+- Construction / Fabrication Control System
+
+ </p>
+            </div>
+        </div> 
+           </div>
+					  <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Target QMS </h4>
+                <p class="text-slate-700 text-lg">
+				The following criteria should be considered for SUBCONTRACTOR selection:
+				<br><br>
+- COMPANY Approval (ACL) <br>
+- Experience / Previous approvals<br>
+- Resources<br>
+- Safety Program and Previous Safety Performance<br>
+- QA/QC Procedures and Quality Plan<br>
+- Local Content
+
+
+ </p>
+            </div>
+        </div> 
+           </div>        
+                    <!-- Air Cooled -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500" >
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/Picture10.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in" >
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                           </div>
+                </div>
+            </div>
+        </section>
+		
+		
+		 <!-- Slide 19: PROCURENT QUALITY SYSTEM-->
+ <section id="slide-19" class="slide">
+             <div class="slide-content-wrapper flex flex-col gap-6"> 
+	            <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROCURENT QUALITY SYSTEM</h2>
+		<div class="flex-1">
+		  <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Target QMS </h4>
+                <p class="text-slate-700 text-lg">
+- Project Quality system <br>
+- Engineering Quality system<br>
+- Procurement Quality System<br>
+- Construction / Fabrication Control System
+
+ </p>
+            </div>
+        </div> 
+           </div>
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			<p class="text-slate-700 text-lg">
+<strong>1. PROCUREMENT REQUISITION </strong> Procurement Requisitions prepared by the CONTRACTOR’s Engineering SUB- CONTRACTOR and consider MTO, Approved MR, TBE Template, Project Requirements & Schedule, VDRL OR SDRL, ITPs, Approved Technical specification and Data sheet.
+<br>
+<strong>2. TECHNICAL BID EVALUATION (TBE) </strong> Engg SUBCON generates detailed TBE Reports showing, as a minimum, 	compliance to each requirement of data sheets, specifications, material requisitions, etc There shall be at least (3) 	bids per requisition. The CONTRACTOR submits the TBE along with the selected offers for COMPANY approval, 	CONTRACTOR shall not place PO before COMPANY Approval.
+<br>
+<strong>3. PURCHASE ORDER</strong> Based on the TBE & Commercial bid CONTRACTOR shall award the purchase order to VENDOR. Award recommendation notification shall be provided to the COMPANY.
+<br>
+<strong>4. KICK-OFF MEETING (KOM)</strong> CONTRACTOR shall conduct a Kick-off Meeting (KOM) with outsourced awarded 	VENDORs/suppliers after PO placement in the presence of COMPANY representatives.
+<br>
+<strong>5. PRE-INSPECTION MEETING (PIM)</strong>  PIM package to be submitted for COMPANY final review and approval at least 	two (2) weeks prior to PIM commencement.
+<br>
+ <strong>6.EXPEDITING CONTROL </strong> Project expediting and control are critical aspects of project management that involve 	overseeing and ensuring the timely and efficient progress of outsourced activities.
+<br>
+<strong>7. THIRD-PARTY INSPECTION AGENCIES (TPIA) </strong> VENDOR shall engage the services of an independent Third- 	Party Inspection (TPI) agency, for material certification requires 3.2.
+<br>
+<strong>8. PERFORMANCE MONITORING </strong> Outsourced interested parties' performance evaluation shall be performed as per 	the Company SP- AGES-SP-13-001.
+<br>
+<strong>9.PRESERVATION PACKING AND STORAGE </strong> Specific preservation procedures applicable to the critical items or 	items that require special care and preservation requirements shall be submitted by the VENDOR through 	CONTRACTOR. Material preservation and storage elements should be in line with Company requirements AGES- 	GL-13-001 section 14.13.
+<br>
+<strong>10. FINAL VENDOR/MANUFACTURER DOSSIERS </strong> The VENDOR/Manufacturer should submit through 	CONTRACTOR a proposed final manufacturer dossier which contains MRDB, and IOM documents as per the approved Index.
+<br><br>
+<strong>- The MRDB (Manufacturer Record & Design Book) </strong>shall contain all quality & Engineering-related documents.<br>
+<strong>- The IOM (Installation, Operation & Maintenance Manuals) </strong>shall contain all installation, operation, and maintenance- related documents & manuals. Within two (2) weeks of issuing the final IRN, the VENDOR should submit through CONTRACTOR the final  VENDOR / manufacturer dossier as per the approved indexes.
+<br><br>
+<strong>11. SMAR (STOCK MATERIAL APPROVAL REQUEST) </strong> All materials shall be newly manufactured, except in very limited cases Stock material may be accepted with the submission 
+of Stock Material Approval Request “SMAR” by CONTRACTOR supported with the material test certificates and Proposed ITP for inspection and tests. COMPANY guideline, 
+Procedure for Assessment and Approval of Stockiest Material - A0-Q-PQ-PRO-005 shall follow for SMAR requirement.
+<br>
+<strong>12. INFORMATION FOR EXTERNAL VENDORS / SUBCONTRACTORS </strong> CONTRACTOR shall ensure that List of
+Document part of Request for Quotation, MR/ PR shall be COMPANY approved in Code 1 or at least in Code 2.
+In case any deviation from VENDOR / SUPPLIER / SUBCONTRACTOR on amendments, CONTRACTOR shall communicate officially to COMPANY for their concurrence 
+and alignments before any further proceedings. Related records shall be retained, and response shall be shared with VENDOR / SUPPLIER / SUBCONTRACTOR Compliances.
+                </p>
+            </div>
+        </div>  
+    </div>
+        </section>
+
+ <!-- Slide 20: CONSTRUCTION / FABRICATION QUALITY SYSTEM-->
+<section id="slide-20" class="slide">
+               <div class="slide-content-wrapper flex flex-col gap-6"> 
+	            <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">CONSTRUCTION / FABRICATION QUALITY SYSTEM</h2>
+		<div class="flex-1">
+		  <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			            <h4 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Target QMS </h4>
+                <p class="text-slate-700 text-lg">
+- Project Quality system <br>
+- Engineering Quality system<br>
+- Procurement Quality System<br>
+- Construction / Fabrication Control System
+
+ </p>
+            </div>
+        </div> 
+           </div>
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+			<p class="text-slate-700 text-lg">
+	<strong>	-	Modular component means prefabricated off-site and includes individual and stand-alone modules, multi-modular built-up systems, and panelized systems.</strong>
+<br><br>
+<strong>1. MODULE FABRICATION - CONTRACTOR  </strong> shall submit and obtain approval of Module Execution Plan, Inspection test plans, Method statements, dimensional control plans, quality procedures etc. prior to start of fabrication works.
+<br>
+<strong>2. MODULE SUB - CONTRACTOR  </strong> Module fabrication sub-contractor and yard facilities shall be approved by COMPANY.
+<br>
+<strong>3. Pre-Award Checks </strong>  Pre-contract yard audits prior to the subcontract award shall be carried out by CONTRACTOR. Additionally, CONTRACTOR shall set limits for yards (tonnage, man- hours) based on proven, historical performance and current yard work-load.
+<br>
+<strong>4. Engineering - CONTRACTOR </strong> shall perform detailed engineering required to support the fabrication, transportation, unloading, assembly, construction, operation, and maintenance of 	the modules and pre-assemblies based on site survey.
+<br>
+<strong>5. Structural - CONTRACTOR </strong>  shall design & fabricate module framework, stick-built structures pipe supports, equipment supports etc. as per the requirements of the project specifications, drawings and approved procedures.
+<br>
+ <strong>6.Piping - CONTRACTOR  </strong> shall furnish all pipe, pipe bulks, valves, specialty items, control valves, relief valves, and all other necessary materials in accordance with the specifications including but not limited to all on-module piping and off-module prefabricated piping shipped loose to the site..
+<br>
+<strong>7. Equipment </strong> All equipment supplied/installed shall be new, inspected & tested, clean and 	clear of debris, loose scale, foreign bodies, etc. All equipment's shall be inspected before 	closing off branch connections.
+<br>
+<strong>8. TESTING & COMMISSIONING  </strong>Contractor shall ensure completion of Equipment Installation, Piping, Instrumentation, Electrical, testing, inspection, painting, insulation, fireproofing, heat-tracing, packing, preservation etc. activities prior to testing & commissioning.
+<br><br>
+<strong>- All CONTRACTOR and the SUBCONTRACTOR's quality assurance and control resources shall be approved by COMPANY during the project.</strong>
+<br><br>
+<strong>- All Construction & Fabrication activities shall be controlled & monitored with Inspection & test plans (ITP).</strong>
+<br><br>
+<strong>1.Drawing-Document Control / Traceability at Site </strong> All engineers and staff must use the latest revisions 	of IFC/AFC drawings and documents at the site. Updated and latest revision drawings & documents 	should be used & implemented to ensure accuracy and traceability.
+<br>
+<strong>2. Material Approval / Inspections </strong> All project permanent bulk materials (Civil, Structural, Electrical, 	Instrumentation, Mechanical & HVAC) shall undergo approval via MAR and material inspection/verification 	at the site before utilization.
+<br>
+<strong>3. Execution and Monitoring </strong> All site construction activities must adhere to the approved method 	statement and undergo inspection and verification as per the approved inspection and test plans (ITPs).
+<br>
+<strong>4. Control of Non-Conformance</strong>All work must comply with approved drawings, specifications, MOS, and 
+quality control procedures. Any deviation from project requirements shall prompt the raising of an NCR by 	the CONTRACTOR/COMPANY representative. 
+The root cause of NCRs shall be identified by the 	CONTRACTOR and SUB_CONTRACTOR construction management team, and corrective/preventive 	measures shall be 
+implemented in accordance with the Project Procedure for Control of Non- Conformances.
+<br>
+<strong>5. Job Training and Toolbox Talks</strong> Quality and construction team leads must conduct regular toolbox and 
+job-related training sessions for the workforce before commencing any new activity. Critical inspection 
+stages, interventions, and verifications as per the approved ITPs should be identified and communicated 
+to supervisors to ensure approval from CONTRACTOR/COMPANY prior to proceeding with subsequent activities.
+                </p>
+            </div>
+        </div>  
+    </div>
+        </section>
+
+ <!-- Slide 21: PROJECT QUALITY PLAN-->
+ <section id="slide-21" class="slide flex flex-col justify-center items-center text-center p-4">
+                     <div class=" bg-white p-10 md:p-16 ">
+        
+        <span class="block text-sm font-bold text-red-700 uppercase tracking-widest mb-2">TARGET QUALITY MANAGEMENT SYSTEM</span>
+        
+        <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 mb-6 leading-tight">
+           PROJECT QUALITY PLAN
+        </h1>
+        
+        <div class="w-24 h-1 bg-yellow-500 mx-auto mb-8 rounded-full"></div> 
+        
+        <div class="w-full">
+            <div class="flex justify-end">
+                <div class="text-4xl font-extrabold text-slate-800">
+                    <span class="text-red-700">T</span>ARGET
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</section>
+
+ <!-- Slide 22:Codes & Standards-->
+<section id="slide-22" class="slide">
+   <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">Project Quality Plan   </h2>
+            <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Air Cooled -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500">
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/Picture11.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in">
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                                           </div>
+
+                         <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500">
+                         <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/Picture12.jpg"
+							 alt="Slide 15: Plate and Frame Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in">
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                      </div>
+      <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500 ">
+                         <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/Picture13.jpg"
+							 alt="Slide 15: Plate and Frame Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in">
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                      </div>
+<div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500 ">
+                         <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/Picture14.jpg"
+							 alt="Slide 15: Plate and Frame Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in">
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                      </div>
+
+                </div>
+            </div>
+</section>
+
+<!-- Slide 23: PROJECT DOCUMENT CONTROL-->
+ <section id="slide-21" class="slide flex flex-col justify-center items-center text-center p-4">
+                     <div class=" bg-white p-10 md:p-16 ">
+        
+        <span class="block text-sm font-bold text-red-700 uppercase tracking-widest mb-2">TARGET QUALITY MANAGEMENT SYSTEM</span>
+        
+        <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 mb-6 leading-tight">
+           PROJECT DOCUMENT CONTROL
+        </h1>
+        
+        <div class="w-24 h-1 bg-yellow-500 mx-auto mb-8 rounded-full"></div> 
+        
+        <div class="w-full">
+            <div class="flex justify-end">
+                <div class="text-4xl font-extrabold text-slate-800">
+                    <span class="text-red-700">T</span>ARGET
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</section>
+
+<!-- Slide 24: PROJECT DOCUMENT REFERENCE-->
+<section id="document-control-slide" class="slide">
+    <h2 class="text-3xl font-bold text-slate-800 mb-6 slide-header">PROJECT DOCUMENT REFERENCE</h2>
+
+    <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+        <div class="mb-6 p-4 rounded-xl shadow-lg border-t-4 border-blue-500 bg-white">
+            <p class="text-slate-700 text-base mb-4 border-b pb-3">
+              All the project documents/drawing including VENDOR documents shall be numbered according to A0- ENG-D-PRO-001 (Rev.2),
+			  Part -B Numbering Procedure for Lower Zakum Field, Nasr Field, Umm Lulu Field, SARB Field, Umm Shaif Field, Das Island,
+			  Bu Haseer Field, Belbazem Block Field and Al Omairah Island.
+            </p>
+<h4 class="text-lg font-bold text-slate-800 mb-3">PROJECT DOCUMENT CONTROL PROCEDURE AD-42.0-G-00020</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">             
+                <div class="bg-slate-50 p-4 rounded-lg shadow-sm">
+                    <h4 class="text-lg font-bold text-slate-800 mb-3">7.1.1 COMPANY DOCUMENT NUMBER</h4>
+                    <p class="text-sm text-slate-600 mb-2">Company Document/Dwg number shall be used at all times.</p>
+                    <table class="min-w-full divide-y divide-slate-300 border border-slate-300 rounded-lg overflow-hidden mb-3">
+                        <thead class="bg-slate-200">
+                            <tr>
+                                <th scope="col" class="px-2 py-2 text-center text-xs font-bold text-slate-700 uppercase tracking-wider border-r">Identifier</th>
+                                <th scope="col" class="px-2 py-2 text-center text-xs font-bold text-slate-700 uppercase tracking-wider border-r">Document type</th>
+                                <th scope="col" class="px-2 py-2 text-center text-xs font-bold text-slate-700 uppercase tracking-wider border-r">Area Number</th>
+                                <th scope="col" class="px-2 py-2 text-center text-xs font-bold text-slate-700 uppercase tracking-wider border-r">Discipline Code</th>
+                                <th scope="col" class="px-2 py-2 text-center text-xs font-bold text-slate-700 uppercase tracking-wider">Sequence Number</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200 text-sm text-slate-700">
+                            <tr>
+                                <td class="px-2 py-1 whitespace-nowrap text-center border-r">ZZ</td>
+                                <td class="px-2 py-1 whitespace-nowrap text-center border-r">AA</td>
+                                <td class="px-2 py-1 whitespace-nowrap text-center border-r">XXXX</td>
+                                <td class="px-2 py-1 whitespace-nowrap text-center border-r">A</td>
+                                <td class="px-2 py-1 whitespace-nowrap text-center">NNNN</td>
+                            </tr>
+                            <tr class="bg-blue-50/50">
+                                <td class="px-2 py-1 whitespace-nowrap text-center border-r">AD </td>
+                                <td class="px-2 py-1 whitespace-nowrap text-center border-r">GD</td>
+                                <td class="px-2 py-1 whitespace-nowrap text-center border-r">42.0 </td>
+                                <td class="px-2 py-1 whitespace-nowrap text-center border-r">Q (Quality)</td>
+                                <td class="px-2 py-1 whitespace-nowrap text-center">XXXX</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="text-xs text-slate-600">
+                       <strong> ZZ - </strong>Identification Number<br>
+                       <strong> AA - </strong>Document Type (Refer A0- ENG-D-PRO-001 (Rev.1) Part B, Appendix B)<br>
+                       <strong> XXXX -</strong> Area Number (Refer A0- ENG-D-PRO-001 (Rev.1) Part B, Appendix A)<br>
+                       <strong> A -</strong> Discipline Code (Refer A0- ENG-D-PRO-001 (Rev.1) Part B, Appendix B Section 7.1)<br>
+                       <strong> NNNN - </strong>Sequence Number (shall be unique, comprising of minimum 4-digit numbers)
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-lg shadow-sm">
+                    <h4 class="text-lg font-bold text-slate-800 mb-3">7.1.2 CONTRACTOR DOCUMENT NUMBER</h4>
+                    <p class="text-sm text-slate-600 mb-2">
+                        If Company numbers are not provided after requests, then the Contractor number which is optional may be used only on the first submission.
+                    </p>
+                    <table class="min-w-full divide-y divide-slate-300 border border-slate-300 rounded-lg overflow-hidden mb-3">
+                        <thead class="bg-slate-200">
+                            <tr>
+                                <th scope="col" class="px-2 py-2 text-center text-xs font-bold text-slate-700 uppercase tracking-wider border-r">Project Name</th>
+                                <th scope="col" class="px-2 py-2 text-center text-xs font-bold text-slate-700 uppercase tracking-wider border-r">Document Discipline code</th>
+                                <th scope="col" class="px-2 py-2 text-center text-xs font-bold text-slate-700 uppercase tracking-wider">Sequence Number</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200 text-sm text-slate-700">
+                            <tr>
+                                <td class="px-2 py-1 whitespace-nowrap text-center border-r">YYYY</td>
+                                <td class="px-2 py-1 whitespace-nowrap text-center border-r">A</td>
+                                <td class="px-2 py-1 whitespace-nowrap text-center">NNNN</td>
+                            </tr>
+                            <tr class="bg-blue-50/50">
+                                <td class="px-2 py-1 whitespace-nowrap text-center border-r">LZP5</td>
+                                <td class="px-2 py-1 whitespace-nowrap text-center border-r">Q</td>
+                                <td class="px-2 py-1 whitespace-nowrap text-center">0005</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="text-xs text-slate-600">
+                       <strong> YYYY -</strong> Project Name<br>
+                        <strong>A - </strong>Document discipline code<br>
+                        <strong>NNNN - </strong>Sequence Number (shall be unique, comprising of minimum 4-digit numbers)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6">
+            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-green-500">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">7.2 DOCUMENT CLASS </h3>
+                <p class="text-slate-700 text-base mb-4">
+All drawings, documents, and manuals to be submitted by CONTRACTOR have been classified in one of the following 
+three categories for the purpose of review, comment, and approval by COMPANY:                </p>
+
+                <div class="space-y-4">
+                    <div class="p-4 border border-green-300 rounded-lg bg-green-50">
+                        <h4 class="text-lg font-bold text-green-700 mb-2">CLASS - 1 </h4>
+                        <p class="text-sm text-slate-700">
+                           * Documentation that requires COMPANY approval and will be reviewed by COMPANY.<br>
+                            * Class 1 documentation shall require formal COMPANY approval before progression of related work.<br>
+                            * Documentation shall be submitted to COMPANY at each revision. Comments given by COMPANY shall be resolved to
+							the satisfaction of COMPANY.
+                        </p>
+                    </div>
+
+                    <div class="p-4 border border-orange-300 rounded-lg bg-orange-50">
+                        <h4 class="text-lg font-bold text-orange-700 mb-2">CLASS - 2 </h4>
+                        <p class="text-sm text-slate-700">
+                            * Documentation shall be issued to COMPANY for comment at each revision.<br>
+                            * Documents which fall into this category include items that would have no serious consequence to the PROJECT 
+							with respect to environment or operation should failure occur, or where the design is simple and unambiguous.<br>
+                            * Any comments given by COMPANY shall be resolved to the reasonable satisfaction of COMPANY.<br>
+                            * If comments are not received within the stipulated period, CONTRACTOR shall inform COMPANY in 
+							writing of its intention to proceed with the related work.
+                        </p>
+                    </div>
+
+                    <div class="p-4 border border-blue-300 rounded-lg bg-blue-50">
+                        <h4 class="text-lg font-bold text-blue-700 mb-2">CLASS - 3 </h4>
+                        <p class="text-sm text-slate-700">
+* Documentation shall be issued to COMPANY for information only.
+ However, comments made on Class 3 documents shall also be considered and resolved to the reasonable satisfaction of COMPANY.                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 25: PROJECT DOCUMENT REFERENCE-->
+<section id="doc-approval-and-attachments-slide" class="slide">
+    <h2 class="text-3xl font-bold text-slate-800 mb-6 slide-header">PROJECT DOCUMENT REFERENCE </h2>
+
+    <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500">
+                <h3 class="text-xl font-bold text-slate-800 mb-4">PROJECT DOCUMENT CONTROL PROCEDURE (AD-42.0-G-00020)</h3>
+
+                <div class="mb-6 p-4 border border-slate-300 rounded-lg bg-slate-50">
+                    <h4 class="text-lg font-semibold text-slate-700 mb-2">Attachments Included in the Procedure:</h4>
+                    <ul class="list-none text-base text-slate-700 space-y-1">
+                        <li>ATTACHMENT 1 - IDC MATRIX</li>
+                        <li>ATTACHMENT 2 - DOCUMENT DISTRIBUTION MATRIX (DDM)</li>
+                        <li>ATTACHMENT 3 - DRAWING AND DOCUMENT NUMBER REQUEST FORM</li>
+                        <li>ATTACHMENT 4 - EQUIPMENT TAG NUMBER REQUEST FORM</li>
+                        <li>ATTACHMENT 5 - LINE NUMBER REQUEST FORM</li>
+                        <li>ATTACHMENT 6 - MANUAL VALVE TAG REQUEST FORM</li>
+                        <li>ATTACHMENT 7 - HVAC TAG REQUEST FORM</li>
+                        <li>ATTACHMENT 8 - DOCUMENT TEMPLATE</li>
+                        <li>ATTACHMENT 9 - CRS TEMPLATE</li>
+                        <li>ATTACHMENT 10 - TRANSMITTAL RECEIPT SHEET</li>
+                    </ul>
+                </div>
+
+                <div class="p-4 border border-slate-300 rounded-lg bg-indigo-50">
+                    <h4 class="text-lg font-semibold text-slate-700 mb-3">7.3 DOCUMENT APPROVAL PROCESS </h4>
+                    <p class="text-sm text-slate-700 mb-3">
+                        All documents prepared by CONTRACTOR, depending on their class, pass through the following applicable stages:
+                    </p>
+                    <div class="grid grid-cols-2 gap-x-4 text-sm text-slate-800 font-medium">
+                        <div>
+                            <p class="mb-1">*IFR : Issued for Review</p>
+                            <p class="mb-1">*IFD : Issued for Design</p>
+                            <p class="mb-1">*IFI : Issued for Information</p>
+                            <p class="mb-1">*IFE : Issued for Enquiry</p>
+                            <p class="mb-1">*IFP : Issued for Purchase</p>
+                            <p class="mb-1">*IFA : Issued for Approval</p>
+                        </div>
+                        <div>
+                            <p class="mb-1">*IFC : Issued for Construction</p>
+                            <p class="mb-1">*ICN : Issued for cancellation</p>
+                            <p class="mb-1">*IFH : Issued for HAZOP</p>
+                            <p class="mb-1">*ASB : Issued as Built</p>
+                            <p class="mb-1">*IFL : Issued For Implementation for all specifications & procedures</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-700 mt-3 border-t pt-3">
+                        All technical documents should reach IFC status prior to starting fabrication, manufacturing, or relevant site Works. 
+						The following guideline procedure shall be followed for the review and approval of documents on the project. 
+						All drawings and documents prepared for the COMPANY shall conform to this procedure.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500 overflow-x-auto">
+                <h3 class="text-xl font-bold text-slate-800 mb-4">Document Action Table (COMPANY Review Outcome)</h3>
+                <p class="text-base text-slate-700 mb-3">
+                    The status of documents is tabulated in the Action Table below:
+                </p>
+                <table class="min-w-full divide-y divide-slate-200 border border-slate-300 rounded-lg overflow-hidden">
+                    <thead class="bg-slate-100">
+                        <tr>
+                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-slate-600 uppercase tracking-wider border-r">APPROVAL CODE</th>
+                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-slate-600 uppercase tracking-wider border-r">DESCRIPTION</th>
+                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-slate-600 uppercase tracking-wider border-r">REMARKS</th>
+                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-slate-600 uppercase tracking-wider">NEXT STEP/ACTION BY CONTRACTOR</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-slate-200 text-sm text-slate-700">
+                        <tr class="bg-green-50/50">
+                            <td class="px-3 py-2 whitespace-nowrap text-center border-r font-bold text-green-700">1</td>
+                            <td class="px-3 py-2 whitespace-normal border-r text-center">APPROVED</td>
+                            <td class="px-3 py-2 whitespace-normal border-r text-center">Work may proceed</td>
+                            <td class="px-3 py-2 whitespace-normal">No further action. Can be resubmitted for IFR in case of significant design changes or 
+							IFC/ASB at the end of the project phase.</td>
+                        </tr>
+                        <tr>
+                            <td class="px-3 py-2 whitespace-nowrap text-center border-r font-bold text-blue-700">2</td>
+                            <td class="px-3 py-2 whitespace-normal border-r text-center">APPROVED WITH COMMENTS</td>
+                            <td class="px-3 py-2 whitespace-normal border-r text-center">Work may proceed subject to compliance with and incorporation of comments.</td>
+                            <td class="px-3 py-2 whitespace-normal">Once comments are incorporated, the Document must be re- issued to COMPANY for Approval (IFA).</td>
+                        </tr>
+                        <tr class="bg-yellow-50/50">
+                            <td class="px-3 py-2 whitespace-nowrap text-center border-r font-bold text-orange-700">3</td>
+                            <td class="px-3 py-2 whitespace-normal border-r text-center">REVIEWED WITH COMMENTS</td>
+                            <td class="px-3 py-2 whitespace-normal border-r text-center">Correct and resubmit</td>
+                            <td class="px-3 py-2 whitespace-normal">Incorporate Comments & re-issue for Review (IFR).</td>
+                        </tr>
+                        <tr>
+                            <td class="px-3 py-2 whitespace-nowrap text-center border-r font-bold text-gray-700">4</td>
+                            <td class="px-3 py-2 whitespace-normal border-r text-center">INFORMATION ONLY</td>
+                            <td class="px-3 py-2 whitespace-normal border-r text-center">Accepted for Information only</td>
+                            <td class="px-3 py-2 whitespace-normal">No action. Deliverable must be re-submitted once comments are incorporated subject 
+							to content and compliance requirements of AGREEMENT.</td>
+                        </tr>
+                        <tr class="bg-red-50/50">
+                            <td class="px-3 py-2 whitespace-nowrap text-center border-r font-bold text-red-700">5</td>
+                            <td class="px-3 py-2 whitespace-normal border-r text-center">REJECTED</td>
+                            <td class="px-3 py-2 whitespace-normal border-r text-center">N/A</td>
+                            <td class="px-3 py-2 whitespace-normal">Re-submit for review (IFR).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 26: PROJECT DOCUMENT REFERENCE-->
+<section id="doc-review-handover-cycle-slide" class="slide">
+    <h2 class="text-3xl font-bold text-slate-800 mb-6 slide-header">PROJECT DOCUMENT REFERENCE - PROJECT DOCUMENT CONTROL PROCEDURE AD-42.0-G-00020</h2>
+
+    <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-indigo-500">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">17 FINAL HAND OVER DOCUMENTATION</h3>
+
+                <p class="text-base text-slate-700 mb-4">
+                    Final project handover shall be as per COMPANY's Final Dossier Handover procedure A0-ENG-D-PRO-003 (Rev. 0).
+                </p>
+
+                <div class="p-4 border border-indigo-300 rounded-lg bg-indigo-50">
+                    <p class="text-sm text-slate-700 mb-3">
+                        Final documentation prepared by the CONTRACTOR and submitted to the COMPANY should include the following documents,
+						but not be limited to. The format, indices, and extent of the content of the manuals will be subject to COMPANY's 
+						written approval prior to the start of compilation.
+                    </p>
+                   
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">9.5 REVIEW AND APPROVAL CYCLE</h3>
+
+                <p class="text-sm text-slate-700 mb-4 border-b pb-3">
+THE COMPANY may review, comment on, and approve any drawings, work documentation or construction
+ and technical data prepared by the CONTRACTOR pursuant to the AGREEMENT as they are developed and,
+ in each case, within twenty-one (21) DAYS of submission to the COMPANY (or such other period as may 
+ be agreed between the PARTIES). The CONTRACTOR may consider such submissions to be approved if the COMPANY does not expressly approve,
+ comment on or reject such submissions within such twenty-one (21) DAY period, provided that the CONTRACTOR has notified the COMPANY in writing 
+of its intention to proceed on such basis following the expiry of such twenty-one (21) DAY period.
+                </p>
+
+<p>For Class 1 & 2 documents the approval cycle shall be followed as per clause 8.4.</p>
+
+  <div class="p-4 border border-green-300 rounded-lg bg-green-50">
+                        
+                        <h4 class="text-base font-semibold text-green-800 mb-2">CONTRACTOR shall re-submit the documents after incorporating COMPANY comments as may be necessary:</h4>
+                        <p class="text-sm text-slate-700 mb-3">
+* THE COMPANY shall notify the CONTRACTOR of any modifications or changes required by the COMPANY in respect of any documentation submitted,
+ and the CONTRACTOR shall, without delay and in all cases within fourteen (14) DAYS, resubmit the documentation incorporating such modifications or changes,
+ including any previously approved documentation which may be impacted by such modifications or changes. This procedure shall be repeated, if necessary,
+ until the documentation is in a form acceptable to the COMPANY, based on the requirements set out in the AGREEMENT.                   </p>
+           <p class="text-sm text-slate-700 mb-3">
+* Certain documents require review periods more than the review period stipulated and shall be noted as below.               </p>
+						<ul class="list-disc list-inside text-sm text-slate-800 space-y-1 pl-4">
+                            <li>Mechanical Completion, Pre-Commissioning, Commissioning, and Start-up Procedures and Manual: 30 Working Days</li>
+                            <li>Commissioning Procedures and Manual: 30 Working Days</li>
+                            <li>Test Run Procedure and Manual: 30 Working Days</li>
+                            <li>Operation & Maintenance Manuals (including VENDOR equipment): 30 Working Days</li>
+                            <li>SPIR Packages: 60 Working Days</li>
+                            <li>SIL Assignment Report and Verification Report: 30 Working Days</li>
+                            <li>Fire & Explosion Risk Assessment (FERA): 20 Working Days</li>
+                            <li>HSECES Report: 20 Working Days</li>
+                            <li>Electrical power system study (ETAP/PSCAD): 20 Working Days</li>
+                        </ul>
+                    </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 27: PROJECT DOCUMENT REFERENCE-->
+  <section id="slide-27" class="slide">
+            <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">DOCUMENT REVIEW AND APPROVAL    </h2>
+            <div class="slide-content-wrapper1 " >
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Air Cooled -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500">
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/Picture15.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in">
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+        </section>
+
+<!-- Slide 28: PROJECT AUDITS & AUDIT SCHEDULE-->
+ <section id="slide-28" class="slide flex flex-col justify-center items-center text-center p-4">
+                     <div class=" bg-white p-10 md:p-16 ">
+        
+        <span class="block text-sm font-bold text-red-700 uppercase tracking-widest mb-2">TARGET QUALITY MANAGEMENT SYSTEM</span>
+        
+        <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 mb-6 leading-tight">
+           PROJECT AUDITS & AUDIT SCHEDULE
+        </h1>
+        
+        <div class="w-24 h-1 bg-yellow-500 mx-auto mb-8 rounded-full"></div> 
+        
+        <div class="w-full">
+            <div class="flex justify-end">
+                <div class="text-4xl font-extrabold text-slate-800">
+                    <span class="text-red-700">T</span>ARGET
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</section>
+
+<!-- Slide 29:PROJECT AUDITS-->
+           <section id="slide-29" class="slide">
+           <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROJECT AUDITS </h2>
+            <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Air Cooled -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500" >
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/Picture16.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in" >
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                           </div>
+
+                         <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500" >
+                         <!-- Image Container -->
+                        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+                <p class="text-slate-700 text-lg">
+1. EPC contractor has developed PROJECT AUDIT PROCEDURE “AD-42.0-Q- 96006” APPROVED by COMPANY.<br>
+2. Audits are performed by EPC Contractor, COMPANY and External Third Parties
+
+ </p>
+            </div>
+        </div> 
+                      </div>
+                </div>
+            </div>
+        </section>
+
+<!-- Slide 30:PROJECT AUDITS-->
+<section id="audit-follow-up-slide" class="slide">
+    <h2 class="text-3xl font-bold text-slate-800 mb-6 slide-header">PROJECT AUDITS</h2>
+
+    <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500 flex items-start">
+                <div class="p-4 border border-blue-300 rounded-lg bg-blue-50 w-full">
+                            <p class="text-sm text-slate-700 font-bold mb-1">
+                              * Project Director, Project Manager along with all the department / discipline managers and leads shall take part in the 
+								Internal and external audits and ensure the audit findings are addressed to improve the system and close audit findings on time.
+                            </p>
+                        
+                    
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-red-500">
+                
+                <h3 class="text-xl font-bold text-slate-800 mb-3">7.7.8 ACTION OF AUDIT NONCONFORMITY, CAR, AREA OF IMPROVEMET (AOF) / AREA FOR IMPROVEMENT (AFI)</h3>
+
+                <p class="text-sm text-slate-700 mb-4">
+                    Upon receipt of the Audit report, within two weeks Auditee shall submit the Audit close out action plan detailing the 
+					target close out dates and proposed corrective actions for Audit Team review and acceptance. In case an extension to previously agreed action closeout date,
+					the Auditee shall provide valid reason for extension and obtain the Audit Team Leader acceptance.
+                </p>
+                <p class="text-sm text-slate-700 mb-6 border-b pb-3">
+                    During the next round of audit, any previous audit non-conformances / improvements are reviewed to confirm that similar cases are not repeated.
+                </p>
+
+                <h3 class="text-xl font-bold text-slate-800 mb-3">8.0 AUDIT FOLLOW UP AND CLOSEOUT</h3>
+
+                <p class="text-sm text-slate-700 mb-4">
+                    Audit Findings and reports shall be issued to all interested parties within 07 Working days of the formal audit close out meeting. 
+					If it is delayed, the reasons should be communicated to the auditee and the <strong>individual(s)</strong> managing the audit program.
+					Whenever the audit report is issued, the audit findings shall be recorded in the audit log sheet for the traceability until the findings are closed.
+					The auditors, Project Quality Lead, shall trace the corrective actions corresponding to the applicable audit findings. As per A0-Q-PQ-SP-002(Rev.0) 
+					Specification for Requirements for Projects Contractor Quality System, Clause 3.7.1, Paragraph No.: 09, All non-conformances shall be closed within six (6)
+					weeks of identification, or the closeout date must be approved by COMPANY.
+                </p>
+                
+                <div class="p-4 border border-green-300 rounded-lg bg-green-50">
+                    <p class="text-sm text-slate-700">
+                        On satisfactory completion of corrective actions, Auditee shall provide evidence to the Auditor to close out the agreed action. 
+						Upon satisfactory review of close out evidence, Auditor will close the Audit findings, and the Auditee will be notified.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 31:CLASSIFICATION OF AUDIT FINDINGS-->
+<section id="audit-findings-classification-final-largest-center" class="slide">
+    <h2 class="text-3xl font-bold text-slate-800 mb-6 slide-header">CLASSIFICATION OF AUDIT FINDINGS</h2>
+    <div class="slide-content-wrapper mx-auto flex flex-col items-center justify-center" style="width: 80%; max-width: 850px;">
+
+        <div style="padding-top: 300px;" class="grid grid-cols-2 gap-8 w-full mb-6">
+            
+            <div class="h-full">
+                <div class="bg-white p-4 rounded-lg shadow-lg border-2 border-red-700 h-full flex items-center justify-center text-center">
+                    <p class="text-xs sm:text-sm text-slate-700">
+                        Areas where an auditor finds positive implementations shall be reported as **Best Practices**.
+                    </p>
+                </div>
+            </div>
+
+            <div class="h-full">
+                <div class="bg-white p-4 rounded-lg shadow-lg border-2 border-orange-700 h-full flex items-center justify-center text-center">
+                    <p class="text-xs sm:text-sm text-slate-700">
+                        An OFI is a finding where strengths of the system might be further improved (however compliance is still being achieved).
+                    </p>
+                </div>
+            </div>
+            
+        </div>
+        <div class="w-full aspect-square relative mb-6 mt-0" style="max-width: 450px;">
+            <div class="absolute inset-0 rounded-full overflow-hidden grid grid-cols-2 grid-rows-2 shadow-2xl">
+
+                <div class="flex items-center justify-center text-white font-bold text-base bg-red-700 bg-gradient-to-br from-red-700 to-red-900 border-b border-r border-white/50 p-3 text-center">
+                    Best Practices
+                </div>
+
+                <div class="flex items-center justify-center text-white font-bold text-base bg-orange-600 bg-gradient-to-bl from-orange-600 to-orange-800 border-b border-l border-white/50 p-3 text-center">
+                    OFI
+                </div>
+
+                <div class="flex items-center justify-center text-white font-bold text-base bg-yellow-700 bg-gradient-to-tr from-yellow-700 to-yellow-900 border-t border-r border-white/50 p-3 text-center">
+                    Observations
+                </div>
+
+                <div class="flex items-center justify-center text-white font-bold text-base bg-green-700 bg-gradient-to-tl from-green-700 to-green-900 border-t border-l border-white/50 p-3 text-center">
+                    Non-conformance
+                </div>
+
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-8 w-full mt-6">
+            
+            <div class="h-full">
+                <div class="bg-white p-4 rounded-lg shadow-lg border-2 border-green-500 h-full flex items-center justify-center text-center">
+                    <p class="text-xs sm:text-sm text-slate-700">
+                        Findings that doesn't meet stated requirements, specifications or expectations.
+                    </p>
+                </div>
+            </div>
+
+            <div class="h-full">
+                <div class="bg-white p-4 rounded-lg shadow-lg border-2 border-orange-400 h-full flex items-center justify-center text-center">
+                    <p class="text-xs sm:text-sm text-slate-700">
+                        An existing condition without adequate supporting evidence to verify that it constitutes non-conformity.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+        </div>
+</section>
+
+
+ <!-- Slide 32:PROJECT KPI (KEY PERFORMANCE INDICATORS)-->
+           <section id="slide-32" class="slide">
+           <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROJECT KPI (KEY PERFORMANCE INDICATORS) </h2>
+            <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Air Cooled -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500" >
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/picture17.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in" >
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                           </div>
+ <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500" >
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/picture18.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in" >
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                           </div>
+ <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500" >
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/picture19.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in" >
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                           </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500" >
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/picture20.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in" >
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                           </div>
+                </div>
+            </div>
+        </section>
+		
+<!-- Slide 33:PROJECT RISK MANAGEMENT-->
+<section id="project-risk-management-slide" class="slide">
+    <h2 class="text-3xl font-bold text-slate-800 mb-6 slide-header">PROJECT RISK MANAGEMENT</h2>
+
+    <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div class="bg-blue-900 p-6 rounded-xl shadow-md border-t-4 border-white text-white">
+                <h3 class="text-2xl font-bold text-white mb-4">RISK MANAGEMENT</h3>
+
+                <ul class="list-none space-y-3">
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-base">
+                            Company Approved Risk Management Procedure No. <span class="font-bold">AD-42.0-G-0022</span>
+                        </p>
+                    </li>
+
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-base">
+                            Risk-work Shop With Project Team And All The Project Stake Holders arranged and conducted by <span class="font-bold">CONTRACTOR</span> along with third party chairman
+                        </p>
+                    </li>
+
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-base">
+                            Review & Monitoring Of Risks During Project Execution Phase
+                        </p>
+                    </li>
+
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-base">
+                            Risk Register Document Number <span class="font-bold text-yellow-300">E1150-GD-2000-G-0044</span>
+                        </p>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">OBJECTIVES OF RISK MANAGEMENT</h3>
+
+                <div class="space-y-4 text-slate-700">
+                    <div class="border-b pb-3">
+                        <p class="text-base font-bold text-blue-700">Identify Risks:</p>
+                        <p class="text-sm">
+                            The primary objective of project risk management is to identify potential risks that could impact the project's objectives, deliverables, schedule, budget, or quality. This involves systematically identifying and documenting risks throughout the project lifecycle, considering both internal and external factors.
+                        </p>
+                    </div>
+
+                    <div class="border-b pb-3">
+                        <p class="text-base font-bold text-blue-700">Assess Risks:</p>
+                        <p class="text-sm">
+                            Project risk management aims to assess the likelihood and potential impact of identified risks on the project's success criteria. This involves evaluating risks qualitatively or quantitatively to prioritize them based on their significance and develop appropriate response strategies.
+                        </p>
+                    </div>
+
+                    <div class="border-b pb-3">
+                        <p class="text-base font-bold text-blue-700">Mitigate Risks:</p>
+                        <p class="text-sm">
+                            The objective of project risk management is to develop and implement risk response strategies to mitigate or reduce the likelihood or impact of identified risks. This may involve avoiding, transferring, mitigating, or accepting risks based on their severity, urgency, and feasibility of response measures.
+                        </p>
+                    </div>
+
+                    <div class="border-b pb-3">
+                        <p class="text-base font-bold text-blue-700">Monitor Risks:</p>
+                        <p class="text-sm">
+                            Project risk management aims to monitor and control risks throughout the project lifecycle to ensure that risk response measures are effective and timely. This involves tracking key risk indicators, monitoring changes in the risk landscape and taking corrective actions as necessary to address emerging risks.
+                        </p>
+                    </div>
+
+                    <div class="border-b pb-3">
+                        <p class="text-base font-bold text-blue-700">Optimize Opportunities:</p>
+                        <p class="text-sm">
+                            In addition to managing threats, project risk management seeks to identify and capitalize on opportunities that may arise during the project lifecycle. This involves identifying positive risks or opportunities that could enhance project outcomes and developing strategies to exploit them for the project's benefit.
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-base font-bold text-blue-700">Ensure Project Success:</p>
+                        <p class="text-sm">
+                            The overarching objective of project risk management is to enhance the likelihood of project success by effectively managing risks that could impact project objectives, deliverables, or stakeholder expectations. This involves minimizing the impact of negative risks while maximizing the benefits of positive risks.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 34: PROJECT RISK REGISTER-->
+  <section id="slide-34" class="slide">
+            <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROJECT RISK REGISTER   </h2>
+            <div class="slide-content-wrapper1 " >
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Air Cooled -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500">
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/Picture21.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in">
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+        </section>
+
+<!-- Slide 35: LESSON LEARNED-->
+<section id="project-lesson-learned-slide" class="slide">
+    <h2 class="text-3xl font-bold text-slate-800 mb-6 slide-header">LESSON LEARNED</h2>
+
+    <div class="slide-content-wrapper" style="width: 90%; height: 90%;">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+            <div class="bg-blue-900 p-6 rounded-xl shadow-md border-t-4 border-white text-white flex flex-col justify-center">
+                <h3 class="text-2xl font-bold text-white mb-4">LESSON LEARNT</h3>
+
+                <ul class="list-none space-y-3">
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-base">
+                            Company Approved Lesson Learned Procedure No. <span class="font-bold">AD-42.0-Q-96010</span>
+                        </p>
+                    </li>
+
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-base">
+                            Lesson-Learnt Work Shop With Project Team And All The Project Stake Holders arranged and conducted by <span class="font-bold">CONTRACTOR</span>
+                        </p>
+                    </li>
+
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-base">
+                            Review & Monitoring Of Lessons Learnt During Project Execution Phase
+                        </p>
+                    </li>
+
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-base">
+                            Lesson Learnt Report
+                        </p>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">LESSONS LEARNED IDENTIFICATION & DOCUMENTATION</h3>
+
+                <ul class="list-none space-y-4 text-slate-700">
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-sm">
+                            Lessons learned from past/previous projects which are applicable to the project and present lesson learned related to the project are the inputs considered in the lesson learned session.
+                        </p>
+                    </li>
+
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-sm">
+                            Document lessons learned from the ongoing project, focusing on specific experiences, challenges, and successes encountered during project execution.
+                        </p>
+                    </li>
+
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-sm">
+                            Lessons Learned Register from FEED and Operations (part of CONTRACT document) which are applicable for Project Execution shall be reused and discussed in the workshop.
+                        </p>
+                    </li>
+
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-sm">
+                            Lesson Learned Sessions shall be conducted at the start and end of each phase of the project (Engineering, procurement, Fabrication, construction, commissioning) and also after major activities HAZOP, model review, civil works completion, etc.
+                        </p>
+                    </li>
+
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-sm">
+                            <span class="font-bold">CONTRACTOR</span> shall review the lesson learned register every 3 months for each lesson learned and closeout.
+                        </p>
+                    </li>
+
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-sm">
+                            The next step of the process is to document the results with a detailed report. Lessons Learnt identified from the project and listed in the Project Lesson Learned Register
+                        </p>
+                    </li>
+
+                    <li class="flex items-start">
+                        <span class="text-xl mr-2">&gt;</span>
+                        <p class="text-sm">
+                            Prioritize lessons learned based on their potential impact, relevance, and applicability to future projects. Identify key lessons that are actionable and can drive meaningful improvements in project performance.
+                        </p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-green-500 mt-6">
+            <h3 class="text-xl font-bold text-slate-800 mb-4">LESSON LEARNED CYCLE</h3>
+            <div class="grid grid-cols-5 gap-4 text-center">
+                <div class="p-3 bg-gray-100 rounded-lg border border-gray-300">
+                    <p class="font-bold mb-2">Identify</p>
+                    <p class="text-xs text-slate-700">Capture of all lessons learned during each lesson learned session, mitigation, root cause / needs improvement</p>
+                </div>
+                <div class="p-3 bg-gray-100 rounded-lg border border-gray-300">
+                    <p class="font-bold mb-2">Document</p>
+                    <p class="text-xs text-slate-700">Document key points discussed during the session</p>
+                </div>
+                <div class="p-3 bg-gray-100 rounded-lg border border-gray-300">
+                    <p class="font-bold mb-2">Analyze</p>
+                    <p class="text-xs text-slate-700">Analyze and organize the lessons learned to determine key trends</p>
+                </div>
+                <div class="p-3 bg-gray-100 rounded-lg border border-gray-300">
+                    <p class="font-bold mb-2">Store</p>
+                    <p class="text-xs text-slate-700">Update all lessons learned in Lesson Learned Register</p>
+                </div>
+                <div class="p-3 bg-gray-100 rounded-lg border border-gray-300">
+                    <p class="font-bold mb-2">Retrieve</p>
+                    <p class="text-xs text-slate-700">Refer to the lessons learned documents to improve the current project processes</p>
+                </div>
+            </div>
+            </div>
+
+    </div>
+</section>
+
+<!-- Slide 36: LESSON LEARNED REGISTER (TYPICAL)-->
+  <section id="slide-36" class="slide">
+            <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">LESSON LEARNED REGISTER (TYPICAL)   </h2>
+            <div class="slide-content-wrapper1 " >
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Air Cooled -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-cyan-500">
+                        <!-- Image Container -->
+                        <div class="w-full aspect-[4/3] bg-slate-100 rounded-lg mb-4 overflow-hidden border border-slate-200">
+                             <img src="images/Picture22.jpg"
+							 alt="Slide 13: Air Cooler Diagram" class="zoomable w-full h-full object-contain cursor-zoom-in">
+                             <div class="hidden w-full h-full flex-col items-center justify-center text-center p-4 text-slate-400">
+                             </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+        </section>
+
+ <!-- Slide 37: PROJECT CONFIDENTIALITY -->
+                   <section id="slide-37" class="slide">
+                     <div class="slide-content-wrapper flex flex-col gap-6">
+		   <h2 class="text-3xl font-bold text-slate-800 mb-2 slide-header">PROJECT CONFIDENTIALITY</h2>
+        <div class="flex-1">
+            <div class="bg-white p-9 rounded-xl shadow-lg border border-slate-200">
+                <p class="text-slate-700 text-lg">
+1. Confidentiality of the project needs to be maintained by every person working in this project.<br>
+2. No information shall be disclosed to unauthorised persons or personnel not directly associated with the project.<br>
+3. No project information or reference shall be published in social media.<br>
+4. Mention Disclaimer in the footer of all the documents.<br>
+    ** MPR & WPR<br>
+** MOMs<br>
+** All other deliverables shared via mail
+
+ </p>
+            </div>
+        </div>   
+    </div>
+        </section>
+
+<!-- Slide 38: Conclusion -->
+        <section id="slide-38" class="slide flex flex-col justify-center items-center text-center p-4">
+             <div class="bg-white p-10 md:p-16 rounded-2xl shadow-xl max-w-4xl w-full">
+                <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">✓</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6">Course Complete</h1>
+                <p class="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">Thank You</p>
+                <button onclick="location.reload()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-8 rounded-full shadow-lg">
+                    Restart Course
+                </button>
+            </div>
+        </section>
+		
+		
+   </main>
+
+    <!-- Footer: Nav -->
+  <footer class="bg-white shadow-inner p-4 z-10 flex-shrink-0 border-t border-slate-200">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+        <button id="prev-btn" class="bg-white border border-slate-300 text-slate-700 font-bold py-2 px-6 rounded-lg shadow-sm hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            Previous
+        </button>
+        <div class="flex-1 mx-4">
+            <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out" style="width: 0%;"></div> 
+            </div>
+        </div>
+        <button id="next-btn" class="bg-blue-800 text-white font-bold py-2 px-6 rounded-lg shadow hover:bg-blue-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            Next
+        </button>
+    </div>
+</footer>
+
+  <!-- Zoom Overlay -->
+<div id="zoomOverlay"
+     class="hidden fixed inset-0 bg-black/80 flex items-center justify-center overflow-hidden z-50">
+    <img id="zoomedImage"
+         class="max-w-[90%] max-h-[90%] rounded-lg transition-transform cursor-zoom-out"
+         src="">
+</div>
+
+   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const prevButton = document.getElementById('prev-btn');
+        const nextButton = document.getElementById('next-btn');
+        const slideCounter = document.getElementById('slide-counter');
+        const progressBar = document.getElementById('progress-bar');
+        
+        // ** إضافة متغير حالة البدء وربط زر Start **
+        let isStarted = false; 
+        const startButton = document.getElementById('start-btn'); // يجب أن يكون هذا الـ ID موجوداً في HTML الشريحة 0
+        // ... (بقية المتغيرات)
+
+        const videoModal = document.getElementById('video-modal');
+        const videoModalContent = document.getElementById('video-modal-content');
+        const youtubeIframe = document.getElementById('youtube-iframe');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const playVideoBtns = document.querySelectorAll('.play-video-btn');
+
+        function showSlide(index) {
+            if (index < 0 || index >= totalSlides) return;
+            
+            slides[currentSlideIndex].classList.remove('slide-visible');
+            slides[currentSlideIndex].classList.add('slide-hidden');
+            
+            slides[index].classList.remove('slide-hidden');
+            slides[index].classList.add('slide-visible');
+            
+            currentSlideIndex = index;
+            updateNavigation();
+            
+            // Scroll top content
+            const content = slides[index].querySelector('.slide-content-wrapper');
+            if (content) content.scrollTop = 0;
+        }
+
+        function updateNavigation() {
+            slideCounter.textContent = `Slide ${currentSlideIndex + 1} / ${totalSlides}`;
+            const progressPercentage = ((currentSlideIndex + 1) / totalSlides) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            
+            prevButton.disabled = (currentSlideIndex === 0);
+            
+            // ** المنطق المُعدّل لزر Next **
+            // يتم التعطيل فقط إذا: 
+            // 1. كنا في الشريحة الأخيرة.
+            // 2. أو كنا في الشريحة 0 ولم نضغط على Start بعد.
+            const shouldBeDisabled = (currentSlideIndex === totalSlides - 1) || 
+                                     (currentSlideIndex === 0 && !isStarted);
+                                     
+            nextButton.disabled = shouldBeDisabled;
+        }
+
+        prevButton.addEventListener('click', () => showSlide(currentSlideIndex - 1));
+        
+        // ** ملاحظة: زر Next سيتفعل تلقائياً بعد الانتقال للشريحة 1 **
+        nextButton.addEventListener('click', () => showSlide(currentSlideIndex + 1));
+
+        // ** مستمع حدث زر Start (التعديل الرئيسي) **
+        if (startButton) {
+            startButton.addEventListener('click', () => {
+                isStarted = true; // تفعيل حالة البدء
+                
+                // الانتقال إلى الشريحة التالية (الشريحة 1)
+                showSlide(currentSlideIndex + 1);
+                
+                // إخفاء زر Start بعد بدء الدورة
+                // إذا لم تكن تريد إخفاءه، احذف السطر التالي
+                startButton.classList.add('hidden'); 
+            });
+        }
+        
+        // ... (بقية أكواد الـ Video Modals والـ Zoom)
+
+        const zoomableImages = document.querySelectorAll(".zoomable");
+        const overlay = document.getElementById("zoomOverlay");
+        const zoomImg = document.getElementById("zoomedImage");
+
+        let scale = 1;
+        let isDragging = false;
+        let startX, startY;
+        let translateX = 0;
+        let translateY = 0;
+
+        zoomableImages.forEach(img => {
+            img.addEventListener("click", () => {
+                zoomImg.src = img.src;
+                scale = 1;
+                translateX = 0;
+                translateY = 0;
+                zoomImg.style.transform = `translate(0px, 0px) scale(1)`;
+                overlay.classList.remove("hidden");
+            });
+        });
+
+        overlay.addEventListener("click", (e) => {
+            if (e.target === overlay) {
+                overlay.classList.add("hidden");
+            }
+        });
+
+        zoomImg.addEventListener("wheel", (e) => {
+            e.preventDefault();
+            scale += e.deltaY < 0 ? 0.1 : -0.1;
+            if (scale < 1) scale = 1;
+            if (scale > 5) scale = 5;
+            zoomImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        });
+
+        zoomImg.addEventListener("mousedown", (e) => {
+            if (scale <= 1) return;
+            isDragging = true;
+            zoomImg.style.cursor = "grabbing";
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+        });
+
+        zoomImg.addEventListener("mousemove", (e) => {
+            if (!isDragging) return;
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            zoomImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        });
+
+        zoomImg.addEventListener("mouseup", () => {
+            isDragging = false;
+            zoomImg.style.cursor = "grab";
+        });
+
+        zoomImg.addEventListener("mouseleave", () => {
+            isDragging = false;
+        });
+        
+        // تهيئة البدء
+        updateNavigation();
+    });
+</script>
+</body>
+</html>
